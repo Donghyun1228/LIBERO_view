@@ -5,7 +5,7 @@ from libero.libero.envs.robots import *
 from libero.libero.envs.objects import *
 from libero.libero.envs.predicates import *
 from libero.libero.envs.regions import *
-from libero.libero.envs.utils import rectangle2xyrange
+from libero.libero.envs.utils import rectangle2xyrange, setup_camera_views
 
 
 @register_problem
@@ -216,3 +216,5 @@ class Libero_Living_Room_Tabletop_Manipulation(BDDLBaseDomain):
             pos=[2.1, 0.735, 1.875],
             quat=[0.513, 0.353, 0.443, 0.645],
         )
+
+        setup_camera_views(mujoco_arena)

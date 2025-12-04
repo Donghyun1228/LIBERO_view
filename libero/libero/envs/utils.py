@@ -287,3 +287,97 @@ def rectangle2xyrange(rect_ranges):
         x_ranges.append([rect_range[0], rect_range[2]])
         y_ranges.append([rect_range[1], rect_range[3]])
     return x_ranges, y_ranges
+
+
+def rotate_quaternion(quat, axis, angle_degrees):
+    from scipy.spatial.transform import Rotation as R
+    import numpy as np
+    """Rotate a quaternion around a given axis by a specified angle in degrees."""
+    w, x, y, z = quat
+    r = R.from_quat([x, y, z, w])
+    rotation = R.from_rotvec(np.radians(angle_degrees) * np.array(axis))
+    rotated_r = rotation * r
+    x, y, z, w = rotated_r.as_quat()
+    return [w, x, y, z]
+    
+def setup_camera_views(mujoco_arena):
+        """Sets up the cameras for the arena.
+
+        Args:
+            mujoco_arena (MujocoArena): The mujoco arena instance to set up cameras for.
+        """
+
+        # mujoco_arena.set_camera(
+        #     camera_name="canonical_agentview",
+        #     pos=[0.5386131746834771, 0.0, 1.4903500240372423],
+        #     quat=[
+        #         0.6380177736282349,
+        #         0.3048497438430786,
+        #         0.30484986305236816,
+        #         0.6380177736282349,
+        #     ],
+        # )
+
+        # mujoco_arena.set_camera(
+        #     camera_name="agentview",
+        #     pos=[0.5886131746834771, 0.0, 1.4903500240372423],
+        #     quat=[
+        #         0.6380177736282349,
+        #         0.3048497438430786,
+        #         0.30484986305236816,
+        #         0.6380177736282349,
+        #     ],
+        # )
+
+        mujoco_arena.set_camera(
+            camera_name="agentview_left",
+            pos=[0.5886131746834771, 0.0-0.5, 1.4903500240372423],
+            quat=rotate_quaternion([
+                0.6380177736282349,
+                0.3048497438430786,
+                0.30484986305236816,
+                0.6380177736282349,
+                ],
+                axis=[0, 0, 1],
+                angle_degrees=-45)
+        )
+
+        mujoco_arena.set_camera(
+            camera_name="agentview_right",
+            pos=[0.5886131746834771, 0.0+0.5, 1.4903500240372423],
+            quat=rotate_quaternion([
+                0.6380177736282349,
+                0.3048497438430786,
+                0.30484986305236816,
+                0.6380177736282349,
+                ],
+                axis=[0, 0, 1],
+                angle_degrees=45)
+        )
+
+
+        mujoco_arena.set_camera(
+            camera_name="agentview_left_back",
+            pos=[0.5886131746834771-1.2, 0.0-0.5, 1.4903500240372423],
+            quat=rotate_quaternion([
+                0.6380177736282349,
+                0.3048497438430786,
+                0.30484986305236816,
+                0.6380177736282349,
+                ],
+                axis=[0, 0, 1],
+                angle_degrees=-140)
+        )
+        mujoco_arena.set_camera(
+            camera_name="agentview_right_back",
+            pos=[0.5886131746834771-1.2, 0.0+0.5, 1.4903500240372423],
+            quat=rotate_quaternion([
+                0.6380177736282349,
+                0.3048497438430786,
+                0.30484986305236816,
+                0.6380177736282349,
+                ],
+                axis=[0, 0, 1],
+                angle_degrees=140)
+        )
+

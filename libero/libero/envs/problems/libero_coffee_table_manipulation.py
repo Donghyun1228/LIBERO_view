@@ -5,8 +5,7 @@ from libero.libero.envs.robots import *
 from libero.libero.envs.objects import *
 from libero.libero.envs.predicates import *
 from libero.libero.envs.regions import *
-from libero.libero.envs.utils import rectangle2xyrange
-
+from libero.libero.envs.utils import rectangle2xyrange, setup_camera_views
 
 @register_problem
 class Libero_Coffee_Table_Manipulation(BDDLBaseDomain):
@@ -208,3 +207,5 @@ class Libero_Coffee_Table_Manipulation(BDDLBaseDomain):
                 0.6380177736282349,
             ],
         )
+
+        setup_camera_views(mujoco_arena)
