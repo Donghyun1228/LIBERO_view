@@ -330,7 +330,7 @@ def setup_camera_views(mujoco_arena):
         # )
 
         mujoco_arena.set_camera(
-            camera_name="agentview_left",
+            camera_name="agentview_right",
             pos=[0.5886131746834771, 0.0-0.5, 1.4903500240372423],
             quat=rotate_quaternion([
                 0.6380177736282349,
@@ -343,7 +343,7 @@ def setup_camera_views(mujoco_arena):
         )
 
         mujoco_arena.set_camera(
-            camera_name="agentview_right",
+            camera_name="agentview_left",
             pos=[0.5886131746834771, 0.0+0.5, 1.4903500240372423],
             quat=rotate_quaternion([
                 0.6380177736282349,
@@ -357,7 +357,7 @@ def setup_camera_views(mujoco_arena):
 
 
         mujoco_arena.set_camera(
-            camera_name="agentview_left_back",
+            camera_name="agentview_right_back",
             pos=[0.5886131746834771-1.2, 0.0-0.5, 1.4903500240372423],
             quat=rotate_quaternion([
                 0.6380177736282349,
@@ -369,7 +369,7 @@ def setup_camera_views(mujoco_arena):
                 angle_degrees=-140)
         )
         mujoco_arena.set_camera(
-            camera_name="agentview_right_back",
+            camera_name="agentview_left_back",
             pos=[0.5886131746834771-1.2, 0.0+0.5, 1.4903500240372423],
             quat=rotate_quaternion([
                 0.6380177736282349,
