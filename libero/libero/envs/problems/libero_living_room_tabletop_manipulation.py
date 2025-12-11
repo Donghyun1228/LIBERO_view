@@ -217,4 +217,4 @@ class Libero_Living_Room_Tabletop_Manipulation(BDDLBaseDomain):
             quat=[0.513, 0.353, 0.443, 0.645],
         )
 
-        setup_camera_views(mujoco_arena)
+        setup_camera_views(mujoco_arena, env="living_room")

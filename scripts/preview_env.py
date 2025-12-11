@@ -1,5 +1,6 @@
 from libero.libero import benchmark
 from libero.libero.envs import OffScreenRenderEnv
+from PIL import Image
 import os
 from libero.libero import get_libero_path
 
@@ -9,7 +10,7 @@ task_suite_name = "libero_10" # can also choose libero_spatial, libero_object, e
 task_suite = benchmark_dict[task_suite_name]()
 
 # retrieve a specific task
-task_id = 0
+task_id = 9
 task = task_suite.get_task(task_id)
 task_name = task.name
 task_description = task.language
@@ -31,7 +32,24 @@ init_state_id = 0
 env.set_init_state(init_states[init_state_id])
 
 dummy_action = [0.] * 7
+
+save_dir = "saved_images"
+os.makedirs(save_dir, exist_ok=True)
+
 for step in range(10):
     obs, reward, done, info = env.step(dummy_action)
-    img = obs["agentview_image"][::-1, ::-1]
+
+    if step == 9:
+        imgs = {
+            "agentview": obs["agentview_image"][::-1, ::-1],
+            "agentview_right": obs["agentview_right_image"][::-1, ::-1],
+            "agentview_left": obs["agentview_left_image"][::-1, ::-1],
+            "agentview_right_back": obs["agentview_right_back_image"][::-1, ::-1],
+            "agentview_left_back": obs["agentview_left_back_image"][::-1, ::-1],
+        }
+
+        for name, img_arr in imgs.items():
+            img = Image.fromarray(img_arr)
+            img.save(os.path.join(save_dir, f"{name}_step{step}.png"))
+
 env.close()
