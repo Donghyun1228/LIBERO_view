@@ -486,3 +486,212 @@ def setup_camera_views(mujoco_arena, env):
                     axis=[0, 0, 1],
                     angle_degrees=140)
             )
+        elif env == "coffee_table":
+            mujoco_arena.set_camera(
+                camera_name="agentview_right",
+                pos=[0.5886131746834771, 0.0-0.5, 1.4903500240372423+0.2],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-35)
+            )
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_left",
+                pos=[0.5886131746834771, 0.0+0.5, 1.4903500240372423+0.2],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=35)
+            )
+
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_right_back",
+                pos=[0.5886131746834771-1.35, 0.0-0.5, 1.4903500240372423+0.1],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-140)
+            )
+            mujoco_arena.set_camera(
+                camera_name="agentview_left_back",
+                pos=[0.5886131746834771-1.35, 0.0+0.5, 1.4903500240372423+0.1],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=140)
+            )
+        elif env == "study_tabletop":
+            mujoco_arena.set_camera(
+                camera_name="agentview_right",
+                pos=[0.5886131746834771, 0.0-0.5, 1.4903500240372423+0.2],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-35)
+            )
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_left",
+                pos=[0.5886131746834771, 0.0+0.5, 1.4903500240372423+0.2],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=35)
+            )
+
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_right_back",
+                pos=[0.5886131746834771-1.35, 0.0-0.5, 1.4903500240372423+0.1],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-140)
+            )
+            mujoco_arena.set_camera(
+                camera_name="agentview_left_back",
+                pos=[0.5886131746834771-1.35, 0.0+0.5, 1.4903500240372423+0.1],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=140)
+            )
+        elif env == "floor":
+            mujoco_arena.set_camera(
+                camera_name="agentview_right",
+                pos=[0.5886131746834771, 0.0-0.5, 1.4903500240372423-0.6],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-35)
+            )
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_left",
+                pos=[0.5886131746834771, 0.0+0.5, 1.4903500240372423-0.6],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=35)
+            )
+
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_right_back",
+                pos=[0.5886131746834771-1.35, 0.0-0.5, 1.4903500240372423-0.6],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-140)
+            )
+            mujoco_arena.set_camera(
+                camera_name="agentview_left_back",
+                pos=[0.5886131746834771-1.35, 0.0+0.5, 1.4903500240372423-0.6],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=140)
+            )
+
+        elif env == "tabletop":
+            mujoco_arena.set_camera(
+                camera_name="agentview_right",
+                pos=[0.5886131746834771, 0.0-0.5, 1.4903500240372423+0.2],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-35)
+            )
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_left",
+                pos=[0.5886131746834771, 0.0+0.5, 1.4903500240372423+0.2],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=35)
+            )
+
+
+            mujoco_arena.set_camera(
+                camera_name="agentview_right_back",
+                pos=[0.5886131746834771-1.35, 0.0-0.5, 1.4903500240372423+0.1],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=-140)
+            )
+            mujoco_arena.set_camera(
+                camera_name="agentview_left_back",
+                pos=[0.5886131746834771-1.35, 0.0+0.5, 1.4903500240372423+0.1],
+                quat=rotate_quaternion([
+                    0.6380177736282349,
+                    0.3048497438430786,
+                    0.30484986305236816,
+                    0.6380177736282349,
+                    ],
+                    axis=[0, 0, 1],
+                    angle_degrees=140)
+            )

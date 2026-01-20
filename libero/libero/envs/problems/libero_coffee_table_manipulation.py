@@ -208,4 +208,4 @@ class Libero_Coffee_Table_Manipulation(BDDLBaseDomain):
             ],
         )
 
-        setup_camera_views(mujoco_arena)
+        setup_camera_views(mujoco_arena, env="coffee_table")
