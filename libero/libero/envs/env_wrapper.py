@@ -30,6 +30,9 @@ class ControlEnv:
         hard_reset=True,
         camera_names=[
             "agentview",
+            "agentview_small",
+            "agentview_medium",
+            "agentview_large",
             "agentview_right",
             "agentview_left",
             "agentview_right_back",
