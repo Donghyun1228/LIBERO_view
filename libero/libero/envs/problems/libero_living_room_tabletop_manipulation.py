@@ -259,3 +259,44 @@ class Libero_Living_Room_Tabletop_Manipulation_Light(Libero_Living_Room_Tabletop
         assert (
             self.parsed_problem["problem_name"] == base_class_name
         ), f"Problem name mismatched: {self.parsed_problem['problem_name']} != {base_class_name}"
+
+@register_problem
+class Libero_Living_Room_Tabletop_Manipulation_Texture(Libero_Living_Room_Tabletop_Manipulation):
+    
+    def __init__(self, bddl_file_name, *args, **kwargs):
+        self.workspace_name = "living_room_table"
+        self.visualization_sites_list = []
+        if "living_room_table_full_size" in kwargs:
+            self.living_room_table_full_size = living_room_table_full_size
+        else:
+            self.living_room_table_full_size = (0.70, 1.6, 0.024)
+        self.living_room_table_offset = (0, 0, 0.41)
+        # For z offset of environment fixtures
+        self.z_offset = 0.01 - self.living_room_table_full_size[2]
+        kwargs.update(
+            {"robots": [f"OnTheGround{robot_name}" for robot_name in kwargs["robots"]]}
+        )
+        kwargs.update({"workspace_offset": self.living_room_table_offset})
+        kwargs.update({"arena_type": "living_room"})
+        if "scene_xml" not in kwargs or kwargs["scene_xml"] is None:
+            kwargs.update(
+                {"scene_xml": "scenes/libero_living_room_tabletop_texture_style.xml"}
+            )
+        if "scene_properties" not in kwargs or kwargs["scene_properties"] is None:
+            kwargs.update(
+                {
+                    "scene_properties": {
+                        "floor_style": "wood-plank",
+                        "wall_style": "light-gray-plaster",
+                    }
+                }
+            )
+
+        BDDLBaseDomain.__init__(self, bddl_file_name, *args, **kwargs)
+
+    def _assert_problem_name(self):
+        """Override to handle _texture suffix in class name."""
+        base_class_name = self.__class__.__name__.lower().replace("_texture", "")
+        assert (
+            self.parsed_problem["problem_name"] == base_class_name
+        ), f"Problem name mismatched: {self.parsed_problem['problem_name']} != {base_class_name}"
