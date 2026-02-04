@@ -209,3 +209,40 @@ class Libero_Coffee_Table_Manipulation(BDDLBaseDomain):
         )
 
         setup_camera_views(mujoco_arena, env="coffee_table")
+
+@register_problem
+class Libero_Coffee_Table_Manipulation_Light(Libero_Coffee_Table_Manipulation):
+
+    def __init__(self, bddl_file_name, *args, **kwargs):
+        self.workspace_name = "coffee_table"
+        self.visualization_sites_list = []
+        if "coffee_table_full_size" in kwargs:
+            self.coffee_table_full_size = coffee_table_full_size
+        else:
+            self.coffee_table_full_size = (0.70, 1.6, 0.024)
+        self.coffee_table_offset = (0, 0, 0.41)
+        # For z offset of environment fixtures
+        self.z_offset = 0.01 - self.coffee_table_full_size[2]
+        kwargs.update(
+            {"robots": [f"OnTheGround{robot_name}" for robot_name in kwargs["robots"]]}
+        )
+        kwargs.update({"workspace_offset": self.coffee_table_offset})
+        kwargs.update({"arena_type": "coffee_table"})
+        kwargs.update(
+            {
+                "scene_xml": "scenes/libero_coffee_table_light_style.xml",
+                "scene_properties": {
+                    "floor_style": "wood-plank",
+                    "wall_style": "light-gray-plaster",
+                },
+            }
+        )
+
+        BDDLBaseDomain.__init__(self, bddl_file_name, *args, **kwargs)
+        
+    def _assert_problem_name(self):
+        """Override to handle _light suffix in class name."""
+        base_class_name = self.__class__.__name__.lower().replace("_light", "")
+        assert (
+            self.parsed_problem["problem_name"] == base_class_name
+        ), f"Problem name mismatched: {self.parsed_problem['problem_name']} != {base_class_name}"

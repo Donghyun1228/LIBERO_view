@@ -209,3 +209,38 @@ class Libero_Floor_Manipulation(BDDLBaseDomain):
         )
 
         setup_camera_views(mujoco_arena, env="floor")
+
+@register_problem
+class Libero_Floor_Manipulation_Light(Libero_Floor_Manipulation):
+    def __init__(self, bddl_file_name, *args, **kwargs):
+        self.workspace_name = "floor"
+        self.visualization_sites_list = []
+        self.floor_offset = (0, 0, -0.035)
+
+        self.z_offset = -0.025
+        kwargs.update(
+            {"robots": [f"OnTheGround{robot_name}" for robot_name in kwargs["robots"]]}
+        )
+        kwargs.update({"workspace_offset": self.floor_offset})
+        kwargs.update({"arena_type": "floor"})
+
+        if "scene_xml" not in kwargs or kwargs["scene_xml"] is None:
+            kwargs.update({"scene_xml": "scenes/libero_floor_light_style.xml"})
+        if "scene_properties" not in kwargs or kwargs["scene_properties"] is None:
+            kwargs.update(
+                {
+                    "scene_properties": {
+                        "floor_style": "light-gray",
+                        "wall_style": "light-gray-plaster",
+                    }
+                }
+            )
+
+        BDDLBaseDomain.__init__(self, bddl_file_name, *args, **kwargs)
+
+    def _assert_problem_name(self):
+        """Override to handle _light suffix in class name."""
+        base_class_name = self.__class__.__name__.lower().replace("_light", "")
+        assert (
+            self.parsed_problem["problem_name"] == base_class_name
+        ), f"Problem name mismatched: {self.parsed_problem['problem_name']} != {base_class_name}"
