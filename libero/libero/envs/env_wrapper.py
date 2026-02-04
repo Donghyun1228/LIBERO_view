@@ -2,6 +2,7 @@ import os
 import numpy as np
 import robosuite as suite
 import matplotlib.cm as cm
+import cv2
 
 from robosuite.utils.errors import RandomizationError
 
@@ -61,8 +62,9 @@ class ControlEnv:
         self.problem_name = problem_info["problem_name"]
         self.domain_name = problem_info["domain_name"]
         self.language_instruction = problem_info["language_instruction"]
+        self.perturb = perturb
         
-        if perturb == "light":
+        if self.perturb == "light":
             self.problem_name += "_light"
         self.env = TASK_MAPPING[self.problem_name](
             bddl_file_name,
@@ -96,7 +98,11 @@ class ControlEnv:
         return self.env.obj_of_interest
 
     def step(self, action):
-        return self.env.step(action)
+        obs = self.env.step(action)
+        if self.perturb == "noise":
+            if "agentview_image" in obs[0]:
+                obs[0]["agentview_image"] = cv2.GaussianBlur(obs[0]["agentview_image"], (5, 5), 0)
+        return obs
 
     def reset(self):
         success = False
