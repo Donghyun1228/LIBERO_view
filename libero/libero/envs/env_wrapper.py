@@ -64,8 +64,10 @@ class ControlEnv:
         self.language_instruction = problem_info["language_instruction"]
         self.perturb = perturb
         
-        if self.perturb == "light":
+        if perturb == "light":
             self.problem_name += "_light"
+        elif perturb == "texture":
+            self.problem_name += "_texture"
         self.env = TASK_MAPPING[self.problem_name](
             bddl_file_name,
             robots=robots,
