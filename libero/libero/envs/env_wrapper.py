@@ -45,6 +45,7 @@ class ControlEnv:
         camera_segmentations=None,
         renderer="mujoco",
         renderer_config=None,
+        perturb=None,
         **kwargs,
     ):
         assert os.path.exists(
@@ -60,6 +61,9 @@ class ControlEnv:
         self.problem_name = problem_info["problem_name"]
         self.domain_name = problem_info["domain_name"]
         self.language_instruction = problem_info["language_instruction"]
+        
+        if perturb == "light":
+            self.problem_name += "_light"
         self.env = TASK_MAPPING[self.problem_name](
             bddl_file_name,
             robots=robots,
