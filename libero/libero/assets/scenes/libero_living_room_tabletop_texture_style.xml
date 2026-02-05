@@ -18,7 +18,7 @@
     <texture  name="textable" builtin="flat" height="512" width="512" rgb1="0.5 0.5 0.5" rgb2="0.5 0.5 0.5"/>
     <material name="table_mat" texture="textable" />
 
-    <texture file="../textures/white_marble_floor.png" name="tex-living_room_table" type="2d"/>
+    <texture file="../textures/dark_gray_plaster.png" name="tex-living_room_table" type="2d"/>
     <material name="living_room_table" reflectance="0.5" texrepeat="1 1" texture="tex-living_room_table" texuniform="false"/>
     <mesh file="living_room_table/visual/living_room_table_vis.msh" name="living_room_table_vis" scale="1.5 1.5 1.5"/>
     

@@ -287,7 +287,7 @@ class Libero_Living_Room_Tabletop_Manipulation_Texture(Libero_Living_Room_Tablet
                 {
                     "scene_properties": {
                         "floor_style": "wood-plank",
-                        "wall_style": "light-gray-plaster",
+                        "wall_style": "dark-blue",
                     }
                 }
             )

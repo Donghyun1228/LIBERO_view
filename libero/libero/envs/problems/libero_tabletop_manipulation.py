@@ -281,7 +281,7 @@ class Libero_Tabletop_Manipulation_Texture(Libero_Tabletop_Manipulation):
                 {
                     "scene_properties": {
                         "floor_style": "light-gray",
-                        "wall_style": "light-gray-plaster",
+                        "wall_style": "dark-blue",
                     }
                 }
             )

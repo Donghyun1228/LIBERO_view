@@ -265,8 +265,8 @@ class Libero_Floor_Manipulation_Texture(Libero_Floor_Manipulation):
             kwargs.update(
                 {
                     "scene_properties": {
-                        "floor_style": "white-marble",
-                        "wall_style": "light-gray-plaster",
+                        "floor_style": "dark-gray-plaster",
+                        "wall_style": "dark-blue",
                     }
                 }
             )

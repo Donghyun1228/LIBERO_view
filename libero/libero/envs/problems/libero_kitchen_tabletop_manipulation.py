@@ -287,7 +287,7 @@ class Libero_Kitchen_Tabletop_Manipulation_Texture(Libero_Kitchen_Tabletop_Manip
                 {
                     "scene_properties": {
                         "floor_style": "gray-ceramic",
-                        "wall_style": "yellow-linen",
+                        "wall_style": "dark-blue",
                     }
                 }
             )

@@ -6,7 +6,7 @@
     <material name="floorplane" reflectance="0.0" shininess="0.0"
 	      specular="0.0" texrepeat="3 3" texture="texplane" texuniform="true"/>
     <!-- ceramic table texture and material-->
-    <texture file="../textures/white_marble_floor.png" type="cube" name="tex-table"/>
+    <texture file="../textures/dark_gray_plaster.png" type="cube" name="tex-table"/>
     <material name="table_texture" reflectance="0.0" shininess="0.0" specular="0.2" texrepeat="1 1" texture="tex-table" />
     <!-- steel legs -->
     <texture file="../textures/martin_novak_wood_table.png" type="cube" name="tex-table-legs"/>

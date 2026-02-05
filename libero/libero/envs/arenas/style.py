@@ -1,4 +1,5 @@
 FLOOR_STYLE = {
+    "dark-gray-plaster": "dark_gray_plaster.png",
     "dark": "dark_floor_texture.png",
     "rustic": "rustic_floor.png",
     "light-gray": "light-gray-floor-tile.png",

@@ -5,7 +5,7 @@
     <material name="floorplane" reflectance="0.0" shininess="0.0"
 	      specular="0.0" texrepeat="3 3" texture="texplane" texuniform="true"/>
     <!-- ceramic table texture and material-->
-    <texture file="../textures/white_marble_floor.png" type="cube" name="tex-table"/>
+    <texture file="../textures/dark_gray_plaster.png" type="cube" name="tex-table"/>
     <material name="table_texture" reflectance="0.0" shininess="0.0" specular="0.2" texrepeat="1 1" texture="tex-table" />
     <!-- steel legs -->
     <texture file="../textures/martin_novak_wood_table.png" type="cube" name="tex-table-legs"/>
@@ -40,7 +40,7 @@
     <material name="living_room_table" reflectance="0.5" texrepeat="1 1" texture="tex-living_room_table" texuniform="false"/>
     <mesh file="living_room_table/visual/living_room_table_vis.msh" name="living_room_table_vis" scale="1.0 1.0 1.0"/> -->
 
-    <texture file="../textures/white_marble_floor.png" name="tex-desk" type="2d"/>
+    <texture file="../textures/dark_gray_plaster.png" name="tex-desk" type="2d"/>
     <material name="desk" reflectance="0.5" texrepeat="1 1" texture="tex-desk" texuniform="false"/>
     <mesh file="desk/visual/desk_vis.msh" name="desk_vis" scale="1.0 1.0 1.0"/>
 
