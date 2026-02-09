@@ -63,10 +63,9 @@ class ControlEnv:
         self.domain_name = problem_info["domain_name"]
         self.language_instruction = problem_info["language_instruction"]
         self.perturb = perturb
-        
-        if perturb == "light":
+        if "light" in perturb:
             self.problem_name += "_light"
-        elif perturb == "texture":
+        if "texture" in perturb:
             self.problem_name += "_texture"
         self.env = TASK_MAPPING[self.problem_name](
             bddl_file_name,
@@ -101,9 +100,9 @@ class ControlEnv:
 
     def step(self, action):
         obs = self.env.step(action)
-        if self.perturb == "noise":
+        if "noise" in self.perturb:
             if "agentview_image" in obs[0]:
-                obs[0]["agentview_image"] = cv2.GaussianBlur(obs[0]["agentview_image"], (25, 25), 0)
+                obs[0]["agentview_image"] = cv2.GaussianBlur(obs[0]["agentview_image"], (27, 27), 0)
         return obs
 
     def reset(self):

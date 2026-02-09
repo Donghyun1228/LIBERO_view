@@ -300,3 +300,42 @@ class Libero_Study_Tabletop_Manipulation_Texture(Libero_Study_Tabletop_Manipulat
         assert (
             self.parsed_problem["problem_name"] == base_class_name
         ), f"Problem name mismatched: {self.parsed_problem['problem_name']} != {base_class_name}"
+
+@register_problem
+class Libero_Study_Tabletop_Manipulation_Light_Texture(Libero_Study_Tabletop_Manipulation):
+    def __init__(self, bddl_file_name, *args, **kwargs):
+        self.workspace_name = "study_table"
+        self.visualization_sites_list = []
+        if "table_full_size" in kwargs:
+            self.study_table_full_size = table_full_size
+        else:
+            self.study_table_full_size = (1.0, 1.2, 0.05)
+        self.study_table_offset = (-0.2, 0, 0.867)
+        # For z offset of environment fixtures
+        self.z_offset = 0.01 - self.study_table_full_size[2]
+        kwargs.update(
+            {"robots": [f"Mounted{robot_name}" for robot_name in kwargs["robots"]]}
+        )
+        kwargs.update({"workspace_offset": self.study_table_offset})
+        kwargs.update({"arena_type": "study"})
+
+        if "scene_xml" not in kwargs or kwargs["scene_xml"] is None:
+            kwargs.update({"scene_xml": "scenes/libero_study_light_texture_style.xml"})
+        if "scene_properties" not in kwargs or kwargs["scene_properties"] is None:
+            kwargs.update(
+                {
+                    "scene_properties": {
+                        "floor_style": "light-gray",
+                        "wall_style": "dark-blue",
+                    }
+                }
+            )
+
+        BDDLBaseDomain.__init__(self, bddl_file_name, *args, **kwargs)
+
+    def _assert_problem_name(self):
+        """Override to handle _light_texture suffix in class name."""
+        base_class_name = self.__class__.__name__.lower().replace("_light_texture", "")
+        assert (
+            self.parsed_problem["problem_name"] == base_class_name
+        ), f"Problem name mismatched: {self.parsed_problem['problem_name']} != {base_class_name}"
