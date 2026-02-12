@@ -103,6 +103,12 @@ class ControlEnv:
         if self.perturb is not None and "noise" in self.perturb:
             if "agentview_image" in obs[0]:
                 obs[0]["agentview_image"] = cv2.GaussianBlur(obs[0]["agentview_image"], (27, 27), 0)
+            if "agentview_small_image" in obs[0]:
+                obs[0]["agentview_small_image"] = cv2.GaussianBlur(obs[0]["agentview_small_image"], (27, 27), 0)
+            if "agentview_medium_image" in obs[0]:
+                obs[0]["agentview_medium_image"] = cv2.GaussianBlur(obs[0]["agentview_medium_image"], (27, 27), 0)
+            if "agentview_large_image" in obs[0]:
+                obs[0]["agentview_large_image"] = cv2.GaussianBlur(obs[0]["agentview_large_image"], (27, 27), 0)
         return obs
 
     def reset(self):
