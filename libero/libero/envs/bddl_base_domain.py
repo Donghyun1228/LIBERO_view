@@ -76,11 +76,17 @@ class BDDLBaseDomain(SingleArmEnv):
         arena_type="table",
         scene_xml="scenes/libero_base_style.xml",
         scene_properties={},
+        robot_base_yaw=0.0,
         **kwargs,
     ):
         t0 = time.time()
         # settings for table top (hardcoded since it's not an essential part of the environment)
         self.workspace_offset = workspace_offset
+        self.robot_base_yaw = float(robot_base_yaw)
+        if not np.isfinite(self.robot_base_yaw):
+            raise ValueError(
+                f"robot_base_yaw must be a finite angle in radians, got {robot_base_yaw!r}"
+            )
         # reward configuration
         self.reward_scale = reward_scale
         self.reward_shaping = reward_shaping
@@ -362,6 +368,13 @@ class BDDLBaseDomain(SingleArmEnv):
             mujoco_arena = StudyTableArena(
                 xml=self._arena_xml,
                 **self._arena_properties,
+            )
+
+        # Preserve the nominal LIBERO model when yaw is zero. For shifted
+        # evaluations, rotate the fixed robot root before merging it into the task.
+        if self.robot_base_yaw != 0.0:
+            self.robots[0].robot_model.set_base_ori(
+                np.array([0.0, 0.0, self.robot_base_yaw])
             )
 
         # Arena always gets set to zero origin
