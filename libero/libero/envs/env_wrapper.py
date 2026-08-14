@@ -158,15 +158,50 @@ class ControlEnv:
         self.env.seed(seed)
 
     def set_init_state(self, init_state):
-        return self.regenerate_obs_from_state(init_state)
+        self.set_state(init_state)
+        self._compensate_robot_base_yaw_with_root_joint()
+        return self._regenerate_obs_from_current_state()
 
     def regenerate_obs_from_state(self, mujoco_state):
         self.set_state(mujoco_state)
+        return self._regenerate_obs_from_current_state()
+
+    def _regenerate_obs_from_current_state(self):
         self.env.sim.forward()
         self.check_success()
         self._post_process()
         self._update_observables(force=True)
         return self.env._get_observations()
+
+    def _compensate_robot_base_yaw_with_root_joint(self):
+        if not getattr(self.env, "compensate_robot_base_yaw", False):
+            return
+
+        robot_base_yaw = float(getattr(self.env, "robot_base_yaw", 0.0))
+        if robot_base_yaw == 0.0:
+            return
+
+        root_joint_name = self.env.robots[0].robot_model.joints[0]
+        root_joint_addr = self.env.sim.model.get_joint_qpos_addr(root_joint_name)
+        if not isinstance(root_joint_addr, (int, np.integer)):
+            raise ValueError(
+                f"Expected a scalar root joint qpos address for {root_joint_name!r}, "
+                f"got {root_joint_addr!r}"
+            )
+
+        compensated_qpos = (
+            float(self.env.sim.data.qpos[root_joint_addr]) - robot_base_yaw
+        )
+        root_joint_id = self.env.sim.model.joint_name2id(root_joint_name)
+        if self.env.sim.model.jnt_limited[root_joint_id]:
+            lower, upper = self.env.sim.model.jnt_range[root_joint_id]
+            if not lower <= compensated_qpos <= upper:
+                raise ValueError(
+                    f"Compensated root joint position {compensated_qpos} is outside "
+                    f"the limits [{lower}, {upper}] for {root_joint_name!r}"
+                )
+
+        self.env.sim.data.qpos[root_joint_addr] = compensated_qpos
 
     def close(self):
         self.env.close()
