@@ -99,7 +99,7 @@ class ControlEnv:
         return self.env.obj_of_interest
 
     def step(self, action):
-        obs = self.env.step(action)
+        obs = self.env.step(self._rotate_action_with_robot_base_yaw(action))
         if self.perturb is not None and "noise" in self.perturb:
             if "agentview_image" in obs[0]:
                 obs[0]["agentview_image"] = cv2.GaussianBlur(obs[0]["agentview_image"], (27, 27), 0)
@@ -110,6 +110,34 @@ class ControlEnv:
             if "agentview_large_image" in obs[0]:
                 obs[0]["agentview_large_image"] = cv2.GaussianBlur(obs[0]["agentview_large_image"], (27, 27), 0)
         return obs
+
+    def _rotate_action_with_robot_base_yaw(self, action):
+        if not getattr(self.env, "rotate_actions_with_robot_base_yaw", False):
+            return action
+
+        robot_base_yaw = float(getattr(self.env, "robot_base_yaw", 0.0))
+        if robot_base_yaw == 0.0:
+            return action
+
+        transformed_action = np.asarray(action, dtype=np.float64).copy()
+        if transformed_action.ndim != 1 or transformed_action.shape[0] < 6:
+            raise ValueError(
+                "Expected a one-dimensional pose action with at least 6 values, "
+                f"got shape {transformed_action.shape}"
+            )
+
+        cosine = np.cos(robot_base_yaw)
+        sine = np.sin(robot_base_yaw)
+        yaw_rotation = np.array(
+            [
+                [cosine, -sine, 0.0],
+                [sine, cosine, 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
+        transformed_action[:3] = yaw_rotation @ transformed_action[:3]
+        transformed_action[3:6] = yaw_rotation @ transformed_action[3:6]
+        return transformed_action
 
     def reset(self):
         success = False

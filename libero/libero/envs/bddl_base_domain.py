@@ -78,6 +78,7 @@ class BDDLBaseDomain(SingleArmEnv):
         scene_properties={},
         robot_base_yaw=0.0,
         compensate_robot_base_yaw=False,
+        rotate_actions_with_robot_base_yaw=False,
         **kwargs,
     ):
         t0 = time.time()
@@ -89,6 +90,9 @@ class BDDLBaseDomain(SingleArmEnv):
                 f"robot_base_yaw must be a finite angle in radians, got {robot_base_yaw!r}"
             )
         self.compensate_robot_base_yaw = bool(compensate_robot_base_yaw)
+        self.rotate_actions_with_robot_base_yaw = bool(
+            rotate_actions_with_robot_base_yaw
+        )
         # reward configuration
         self.reward_scale = reward_scale
         self.reward_shaping = reward_shaping
