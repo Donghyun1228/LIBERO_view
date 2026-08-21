@@ -3,13 +3,15 @@ Re-render OpenVLA-style LIBERO HDF5 trajectories with LIBERO_view cameras.
 
 This script expects raw LIBERO HDF5 files with `data/demo_*/states` plus actions
 and robot observations. It replays each demo, applies OpenVLA's no-op filtering,
-keeps successful replays, and writes view-specific RLDS/TFDS directly. The
+keeps successful replays, and writes view-specific RLDS/TFDS directly. It can
+also replay inverse-rotated actions in a robot-base-yaw action-frame shift. The
 public `openvla/modified_libero_rlds` dataset is already rendered RLDS and does
 not contain MuJoCo simulator states, so it cannot be used as the input.
 
 Output layout intentionally keeps the original OpenVLA dataset names under
 separate view roots:
 
+    <tfds-output-root>/original/libero_10_no_noops/1.0.0/...
     <tfds-output-root>/small/libero_10_no_noops/1.0.0/...
     <tfds-output-root>/medium/libero_10_no_noops/1.0.0/...
     <tfds-output-root>/large/libero_10_no_noops/1.0.0/...
@@ -36,6 +38,7 @@ import robosuite.utils.transform_utils as transform_utils
 
 SUITES = ("libero_10", "libero_goal", "libero_object", "libero_spatial")
 VIEWS = {
+    "original": "agentview",
     "small": "agentview_small",
     "medium": "agentview_medium",
     "large": "agentview_large",
@@ -79,6 +82,32 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-tasks-per-suite", type=int, default=None)
     parser.add_argument("--max-episodes-per-task", type=int, default=None)
     parser.add_argument("--settle-steps", type=int, default=10)
+    parser.add_argument(
+        "--robot-base-yaw-deg",
+        type=float,
+        default=0.0,
+        help="Robot-base yaw used by the shifted environment, in degrees.",
+    )
+    parser.add_argument(
+        "--compensate-robot-base-yaw",
+        action="store_true",
+        help="Compensate the restored robot root joint after applying robot-base yaw.",
+    )
+    parser.add_argument(
+        "--rotate-actions-with-robot-base-yaw",
+        action="store_true",
+        help="Let the environment rotate policy-facing actions by robot-base yaw.",
+    )
+    parser.add_argument(
+        "--replay-action-yaw-deg",
+        type=float,
+        default=0.0,
+        help=(
+            "Yaw applied to each source action before it is saved and passed to the "
+            "environment. Use the inverse of --robot-base-yaw-deg to collect successful "
+            "policy-facing demonstrations in the shifted action frame."
+        ),
+    )
     parser.add_argument("--noop-threshold", type=float, default=1e-4)
     parser.add_argument(
         "--skip-noop-filter",
@@ -196,13 +225,25 @@ def collect_tasks(root: Path, suites: list[str], max_tasks_per_suite: int | None
     return tasks
 
 
-def make_env(task: TaskHdf5, camera_name: str, image_size: int, render_gpu_device_id: int) -> OffScreenRenderEnv:
+def make_env(
+    task: TaskHdf5,
+    camera_name: str,
+    image_size: int,
+    render_gpu_device_id: int,
+    *,
+    robot_base_yaw_deg: float,
+    compensate_robot_base_yaw: bool,
+    rotate_actions_with_robot_base_yaw: bool,
+) -> OffScreenRenderEnv:
     env_args = {
         "bddl_file_name": task.bddl_file,
         "camera_heights": image_size,
         "camera_widths": image_size,
         "camera_names": [camera_name, "robot0_eye_in_hand"],
         "render_gpu_device_id": render_gpu_device_id,
+        "robot_base_yaw": np.deg2rad(robot_base_yaw_deg),
+        "compensate_robot_base_yaw": compensate_robot_base_yaw,
+        "rotate_actions_with_robot_base_yaw": rotate_actions_with_robot_base_yaw,
     }
     env = OffScreenRenderEnv(**env_args)
     env.seed(0)
@@ -211,6 +252,33 @@ def make_env(task: TaskHdf5, camera_name: str, image_size: int, render_gpu_devic
 
 def dummy_action() -> list[float]:
     return [0, 0, 0, 0, 0, 0, -1]
+
+
+def rotate_pose_action_yaw(action: np.ndarray, yaw_deg: float) -> np.ndarray:
+    """Rotate translation and axis-angle components while preserving gripper action."""
+    transformed_action = np.asarray(action, dtype=np.float32).copy()
+    if transformed_action.ndim != 1 or transformed_action.shape[0] < 6:
+        raise ValueError(
+            "Expected a one-dimensional pose action with at least 6 values, "
+            f"got shape {transformed_action.shape}"
+        )
+    if yaw_deg == 0.0:
+        return transformed_action
+
+    yaw_rad = np.deg2rad(yaw_deg)
+    cosine = np.cos(yaw_rad)
+    sine = np.sin(yaw_rad)
+    yaw_rotation = np.array(
+        [
+            [cosine, -sine, 0.0],
+            [sine, cosine, 0.0],
+            [0.0, 0.0, 1.0],
+        ],
+        dtype=np.float32,
+    )
+    transformed_action[:3] = yaw_rotation @ transformed_action[:3]
+    transformed_action[3:6] = yaw_rotation @ transformed_action[3:6]
+    return transformed_action
 
 
 def is_noop(action: np.ndarray, prev_action: np.ndarray | None, threshold: float) -> bool:
@@ -253,9 +321,21 @@ def iter_task_examples(
     noop_threshold: float,
     keep_unsuccessful: bool,
     settle_steps: int,
+    robot_base_yaw_deg: float,
+    compensate_robot_base_yaw: bool,
+    rotate_actions_with_robot_base_yaw: bool,
+    replay_action_yaw_deg: float,
 ) -> Iterator[tuple[str, dict[str, Any]]]:
     camera_name = VIEWS[view_key]
-    env = make_env(task, camera_name, image_size, render_gpu_device_id)
+    env = make_env(
+        task,
+        camera_name,
+        image_size,
+        render_gpu_device_id,
+        robot_base_yaw_deg=robot_base_yaw_deg,
+        compensate_robot_base_yaw=compensate_robot_base_yaw,
+        rotate_actions_with_robot_base_yaw=rotate_actions_with_robot_base_yaw,
+    )
     try:
         with h5py.File(task.hdf5_path, "r") as handle:
             demos = sorted(handle["data"].keys(), key=lambda name: int(name.split("_")[-1]))
@@ -270,14 +350,19 @@ def iter_task_examples(
                 obs = env.set_init_state(states[0])
                 done = False
                 for _ in range(settle_steps):
-                    obs, _, done, _ = env.step(dummy_action())
+                    obs, _, step_done, _ = env.step(dummy_action())
+                    done = done or step_done
 
                 steps = []
                 kept_actions: list[np.ndarray] = []
                 for raw_action in actions:
-                    action = np.asarray(raw_action, dtype=np.float32)
+                    action = rotate_pose_action_yaw(raw_action, replay_action_yaw_deg)
                     prev_action = kept_actions[-1] if kept_actions else None
                     if filter_noops and is_noop(action, prev_action, noop_threshold):
+                        # No-op filtering changes the saved dataset, not the physical
+                        # replay. Execute every source action so timing stays faithful.
+                        obs, _, step_done, _ = env.step(action.tolist())
+                        done = done or step_done
                         continue
 
                     steps.append(
@@ -306,7 +391,8 @@ def iter_task_examples(
                         }
                     )
                     kept_actions.append(action)
-                    obs, _, done, _ = env.step(action.tolist())
+                    obs, _, step_done, _ = env.step(action.tolist())
+                    done = done or step_done
 
                 if not steps:
                     print(f"[skip] {task.suite}/{task.task_name}/{demo_name}: no kept actions")
@@ -323,7 +409,13 @@ def iter_task_examples(
                 key = f"{task.suite}_{task.task_id:02d}_{demo_name}"
                 yield key, {
                     "steps": steps,
-                    "episode_metadata": {"file_path": str(task.hdf5_path)},
+                    "episode_metadata": {
+                        "file_path": str(task.hdf5_path),
+                        "robot_base_yaw_deg": np.float32(robot_base_yaw_deg),
+                        "replay_action_yaw_deg": np.float32(replay_action_yaw_deg),
+                        "compensate_robot_base_yaw": compensate_robot_base_yaw,
+                        "rotate_actions_with_robot_base_yaw": rotate_actions_with_robot_base_yaw,
+                    },
                 }
     finally:
         env.close()
@@ -342,6 +434,10 @@ def iter_suite_examples(
     noop_threshold: float,
     keep_unsuccessful: bool,
     settle_steps: int,
+    robot_base_yaw_deg: float,
+    compensate_robot_base_yaw: bool,
+    rotate_actions_with_robot_base_yaw: bool,
+    replay_action_yaw_deg: float,
 ) -> Iterator[tuple[str, dict[str, Any]]]:
     for task in tasks:
         if task.suite != suite:
@@ -357,6 +453,10 @@ def iter_suite_examples(
             noop_threshold=noop_threshold,
             keep_unsuccessful=keep_unsuccessful,
             settle_steps=settle_steps,
+            robot_base_yaw_deg=robot_base_yaw_deg,
+            compensate_robot_base_yaw=compensate_robot_base_yaw,
+            rotate_actions_with_robot_base_yaw=rotate_actions_with_robot_base_yaw,
+            replay_action_yaw_deg=replay_action_yaw_deg,
         )
 
 
@@ -393,7 +493,13 @@ def make_features(image_size: int):
                 }
             ),
             "episode_metadata": tfds.features.FeaturesDict(
-                {"file_path": tfds.features.Text()}
+                {
+                    "file_path": tfds.features.Text(),
+                    "robot_base_yaw_deg": tfds.features.Scalar(dtype=np.float32),
+                    "replay_action_yaw_deg": tfds.features.Scalar(dtype=np.float32),
+                    "compensate_robot_base_yaw": tfds.features.Scalar(dtype=np.bool_),
+                    "rotate_actions_with_robot_base_yaw": tfds.features.Scalar(dtype=np.bool_),
+                }
             ),
         }
     )
@@ -422,7 +528,10 @@ def write_tfds_dataset(
         features=make_features(image_size),
         split_datasets={"train": examples},
         data_dir=view_output_root,
-        description="LIBERO_view re-rendering of raw LIBERO HDF5 trajectories with OpenVLA no-op filtering.",
+        description=(
+            "LIBERO_view re-rendering of raw LIBERO HDF5 trajectories with OpenVLA "
+            "no-op filtering and optional robot-base-yaw action-frame replay."
+        ),
         homepage="https://github.com/openvla/openvla",
         disable_shuffling=True,
     )
@@ -434,7 +543,23 @@ def main() -> None:
     output_root = args.tfds_output_root.expanduser().resolve()
     if not hdf5_root.exists():
         raise SystemExit(f"Missing --libero-hdf5-root: {hdf5_root}")
+    for name, value in (
+        ("robot_base_yaw_deg", args.robot_base_yaw_deg),
+        ("replay_action_yaw_deg", args.replay_action_yaw_deg),
+    ):
+        if not np.isfinite(value):
+            raise SystemExit(f"--{name.replace('_', '-')} must be finite; got {value}")
     reject_rlds_input(hdf5_root)
+
+    if args.rotate_actions_with_robot_base_yaw:
+        net_action_yaw_deg = args.robot_base_yaw_deg + args.replay_action_yaw_deg
+        print(
+            "[action-frame] "
+            f"environment_yaw={args.robot_base_yaw_deg:g}deg "
+            f"replay_yaw={args.replay_action_yaw_deg:g}deg "
+            f"net_controller_yaw={net_action_yaw_deg:g}deg "
+            f"compensate={args.compensate_robot_base_yaw}"
+        )
 
     tasks = collect_tasks(hdf5_root, args.suites, args.max_tasks_per_suite)
     totals: dict[str, tuple[int, int]] = {}
@@ -481,6 +606,10 @@ def main() -> None:
                     noop_threshold=args.noop_threshold,
                     keep_unsuccessful=args.keep_unsuccessful,
                     settle_steps=args.settle_steps,
+                    robot_base_yaw_deg=args.robot_base_yaw_deg,
+                    compensate_robot_base_yaw=args.compensate_robot_base_yaw,
+                    rotate_actions_with_robot_base_yaw=args.rotate_actions_with_robot_base_yaw,
+                    replay_action_yaw_deg=args.replay_action_yaw_deg,
                 ),
                 image_size=args.image_size,
                 overwrite=args.overwrite,
